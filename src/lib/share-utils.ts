@@ -37,11 +37,13 @@ export const generateShareImage = async (data: SharePreviewData): Promise<Blob |
         clone.style.fontSize = `${baseFont}px`;
         clone.style.maxWidth = '920px';
         clone.style.width = '100%';
+        clone.style.maxHeight = '1800px';
         clone.style.boxSizing = 'border-box';
+        clone.style.margin = '0 auto';
 
         // Assurer que le clone est lisible et centré
         const innerWrapper = document.createElement('div');
-        innerWrapper.style.cssText = 'width:100%; display:flex; justify-content:center; align-items:stretch;';
+        innerWrapper.style.cssText = 'width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;';
         innerWrapper.appendChild(clone);
         container.appendChild(innerWrapper);
         document.body.appendChild(container);
@@ -68,6 +70,9 @@ export const generateShareImage = async (data: SharePreviewData): Promise<Blob |
         if (clonedTitle) fitText(clonedTitle, { maxSize: 96, minSize: 20, maxHeight: 420 });
         if (clonedQuote) fitText(clonedQuote, { maxSize: 56, minSize: 16, maxHeight: 820 });
 
+        // S'assurer que le DOM est stable avant capture
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const canvas = await html2canvas(container, {
           backgroundColor: '#ffffff',
           scale: 2.5,
@@ -82,7 +87,7 @@ export const generateShareImage = async (data: SharePreviewData): Promise<Blob |
         document.body.removeChild(container);
 
         return await new Promise((resolve) => {
-          canvas.toBlob((blob) => resolve(blob), 'image/png', 1.0);
+          canvas.toBlob((blob) => resolve(blob), 'image/png', 0.98);
         });
       } catch (err) {
         console.warn('Échec du rendu depuis le DOM source, fallback au template interne.', err);
@@ -196,6 +201,9 @@ export const generateShareImage = async (data: SharePreviewData): Promise<Blob |
     if (titleEl) fitText(titleEl, { maxSize: 96, minSize: 24, maxHeight: 420 });
     if (quoteEl) fitText(quoteEl, { maxSize: 56, minSize: 16, maxHeight: 820 });
 
+    // S'assurer que le DOM est stable avant capture
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Générer l'image avec une résolution élevée
     const canvas = await html2canvas(container, {
       backgroundColor: '#ffffff',
@@ -214,7 +222,7 @@ export const generateShareImage = async (data: SharePreviewData): Promise<Blob |
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
         resolve(blob);
-      }, 'image/png', 1.0);
+      }, 'image/png', 0.98);
     });
   } catch (error) {
     console.error('Erreur lors de la génération de l\'image:', error);
